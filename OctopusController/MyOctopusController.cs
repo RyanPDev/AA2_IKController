@@ -9,10 +9,10 @@ namespace OctopusController
 {
     public enum TentacleMode { LEG, TAIL, TENTACLE };
 
-    public class MyOctopusController 
+    public class MyOctopusController
     {
-        
-        MyTentacleController[] _tentacles =new  MyTentacleController[4];
+
+        MyTentacleController[] _tentacles = new MyTentacleController[4];
 
         Transform _currentRegion;
         Transform _target;
@@ -28,17 +28,17 @@ namespace OctopusController
 
         public float TwistMin { set => _twistMin = value; }
         public float TwistMax { set => _twistMax = value; }
-        public float SwingMin {  set => _swingMin = value; }
+        public float SwingMin { set => _swingMin = value; }
         public float SwingMax { set => _swingMax = value; }
-        
+
 
         public void TestLogging(string objectName)
         {
 
-           
-            Debug.Log("hello, I am initializing my Octopus Controller in object "+objectName);
 
-            
+            Debug.Log("Hello, we are Marc and Ryan and we're initializing our Octopus Controller in object " + objectName);
+
+
         }
 
         public void Init(Transform[] tentacleRoots, Transform[] randomTargets)
@@ -46,11 +46,11 @@ namespace OctopusController
             _tentacles = new MyTentacleController[tentacleRoots.Length];
 
             // foreach (Transform t in tentacleRoots)
-            for(int i = 0;  i  < tentacleRoots.Length; i++)
+            for (int i = 0; i < tentacleRoots.Length; i++)
             {
 
                 _tentacles[i] = new MyTentacleController();
-                _tentacles[i].LoadTentacleJoints(tentacleRoots[i],TentacleMode.TENTACLE);
+                _tentacles[i].LoadTentacleJoints(tentacleRoots[i], TentacleMode.TENTACLE);
                 //TODO: initialize any variables needed in ccd
             }
 
@@ -59,14 +59,15 @@ namespace OctopusController
 
         }
 
-              
+
         public void NotifyTarget(Transform target, Transform region)
         {
             _currentRegion = region;
             _target = target;
         }
 
-        public void NotifyShoot() {
+        public void NotifyShoot()
+        {
             //TODO. what happens here?
             Debug.Log("Shoot");
         }
@@ -87,13 +88,14 @@ namespace OctopusController
         #region private and internal methods
         //todo: add here anything that you need
 
-        void update_ccd() {
-           
+        void update_ccd()
+        {
+
 
         }
 
 
-        
+
 
         #endregion
 
