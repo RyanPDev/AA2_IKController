@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace OctopusController
 {
-  
+
     public class MyScorpionController
     {
         //TAIL
@@ -20,20 +20,28 @@ namespace OctopusController
         Transform[] legTargets;
         Transform[] legFutureBases;
         MyTentacleController[] _legs = new MyTentacleController[6];
+        bool[] legMoving;
 
-        
+
         #region public
-        public void InitLegs(Transform[] LegRoots,Transform[] LegFutureBases, Transform[] LegTargets)
+        public void InitLegs(Transform[] LegRoots, Transform[] LegFutureBases, Transform[] LegTargets)
         {
             _legs = new MyTentacleController[LegRoots.Length];
+            legFutureBases = new Transform[LegFutureBases.Length];
+            legTargets = new Transform[LegTargets.Length];
+            legMoving = new bool[LegRoots.Length];
+            legFutureBases = LegFutureBases;
+            legTargets = LegTargets;
+
             //Legs init
-            for(int i = 0; i < LegRoots.Length; i++)
+            for (int i = 0; i < LegRoots.Length; i++)
             {
+                legMoving[i] = false;
                 _legs[i] = new MyTentacleController();
                 _legs[i].LoadTentacleJoints(LegRoots[i], TentacleMode.LEG);
                 //TODO: initialize anything needed for the FABRIK implementation
             }
-
+            animationRange = Vector3.Distance(_legs[0].Bones[0].position, legFutureBases[0].position);
         }
 
         public void InitTail(Transform TailBase)
@@ -59,7 +67,7 @@ namespace OctopusController
 
         public void UpdateIK()
         {
- 
+            updateLegPos();
         }
         #endregion
 
@@ -70,6 +78,20 @@ namespace OctopusController
         {
             //check for the distance to the futureBase, then if it's too far away start moving the leg towards the future base position
             //
+            for (int i = 0; i < _legs.Length; i++)
+            {
+                if (Vector3.Distance(_legs[i].Bones[0].position, legFutureBases[i].position) > animationRange || legMoving[i])
+                {
+                    legMoving[i] = true;
+                    _legs[i].Bones[0].position = Vector3.Lerp(_legs[i].Bones[0].position, legFutureBases[i].position, Time.deltaTime * 80);
+                   
+                    if (Vector3.Distance(_legs[i].Bones[0].position, legFutureBases[i].position) <= 0.04f)
+                    {
+                        legMoving[i] = false;
+                    }
+                    //_legs[i].Bones[0].position = legFutureBases[i].position;
+                }
+            }
         }
         //TODO: implement Gradient Descent method to move tail if necessary
         private void updateTail()

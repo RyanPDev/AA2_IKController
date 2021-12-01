@@ -23,7 +23,6 @@ namespace OctopusController
             //TODO: add here whatever is needed to find the bones forming the tentacle for all modes
             //you may want to use a list, and then convert it to an array and save it into _bones
 
-            /////////////////PREGUNTA!!!!!!!!!!!!/////////
             tentacleMode = mode;
 
             switch (tentacleMode)
@@ -31,8 +30,9 @@ namespace OctopusController
                 case TentacleMode.LEG:
                     //TODO: in _endEffectorsphere you keep a reference to the base of the leg
                 case TentacleMode.TAIL:
-                    //TODO: in _endEffectorsphere you keep a reference to the red sphere
-                    _bones = root.GetComponentsInChildren<Transform>();
+                    //TODO: in _endEffectorsphere you keep a reference to the red sphere <---- PREGUNTAAAAAAAR CUAAAAAAL DE LOS DOOOOOS
+                   // _bones = root.GetComponentsInChildren<Transform>();
+                    child = root.GetComponent<Transform>();
 
                     _endEffectorSphere = _bones[_bones.Length - 1];
                     Debug.Log(_endEffectorSphere.name);
@@ -40,10 +40,15 @@ namespace OctopusController
                     break;
                 case TentacleMode.TENTACLE:
                     //TODO: in _endEffectorsphere you keep a reference to the sphere with a collider attached to the endEffector
-                    _bones = root.GetComponentsInChildren<Transform>();
-
-                    _endEffectorSphere = _bones[_bones.Length - 2];
-                    Debug.Log(_endEffectorSphere.name);
+                    //_bones = root.GetComponentsInChildren<Transform>();
+                    child = root.GetChild(0).GetChild(0).GetChild(0);
+                    while (child.childCount == 1)
+                    {
+                        list.Add(child);
+                        child = child.GetChild(0);
+                    }
+                    _bones = list.ToArray<Transform>();
+                    _endEffectorSphere = _bones[_bones.Length - 1];
                     break;
             }
             return Bones;
