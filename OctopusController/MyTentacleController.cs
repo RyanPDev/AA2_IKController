@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,7 +30,7 @@ namespace OctopusController
                 case TentacleMode.LEG:
                     //TODO: in _endEffectorsphere you keep a reference to the base of the leg
                     child = root.GetChild(0);
-                        list.Add(child);
+                    list.Add(child);
 
                     while (child.childCount == 2)
                     {
@@ -42,7 +42,7 @@ namespace OctopusController
                     break;
                 case TentacleMode.TAIL:
                     //TODO: in _endEffectorsphere you keep a reference to the red sphere
-                   // _bones = root.GetComponentsInChildren<Transform>();
+                    // _bones = root.GetComponentsInChildren<Transform>();
                     child = root.GetComponent<Transform>();
 
                     while (child.childCount == 2)
@@ -56,7 +56,7 @@ namespace OctopusController
                 case TentacleMode.TENTACLE:
                     //TODO: in _endEffectorsphere you keep a reference to the sphere with a collider attached to the endEffector
                     //_bones = root.GetComponentsInChildren<Transform>();
-                    child = root.GetChild(0).GetChild(0);
+                    child = root.GetChild(0).GetChild(0).GetChild(0);
                     while (child.childCount == 1)
                     {
                         list.Add(child);
