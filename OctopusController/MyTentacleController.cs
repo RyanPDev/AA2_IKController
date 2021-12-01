@@ -25,18 +25,17 @@ namespace OctopusController
 
             tentacleMode = mode;
 
-
             switch (tentacleMode)
             {
                 case TentacleMode.LEG:
                     //TODO: in _endEffectorsphere you keep a reference to the base of the leg
                     child = root.GetChild(0);
+                        list.Add(child);
 
                     while (child.childCount == 2)
                     {
-                        list.Add(child);
-                        
                         child = child.GetChild(1);
+                        list.Add(child);
                     }
                     _bones = list.ToArray<Transform>();
                     _endEffectorSphere = _bones[_bones.Length - 1];
@@ -62,11 +61,9 @@ namespace OctopusController
                     {
                         list.Add(child);
                         child = child.GetChild(0);
-                        Debug.Log(child);
                     }
                     _bones = list.ToArray<Transform>();
                     _endEffectorSphere = _bones[_bones.Length - 1];
-                    Debug.Log(_endEffectorSphere.name);
                     break;
             }
             return Bones;
