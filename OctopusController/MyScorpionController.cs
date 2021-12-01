@@ -15,13 +15,20 @@ namespace OctopusController
         Transform tailEndEffector;
         MyTentacleController _tail;
         float animationRange;
-
         //LEGS
         Transform[] legTargets;
         Transform[] legFutureBases;
         MyTentacleController[] _legs = new MyTentacleController[6];
         bool[] legMoving;
 
+        ////Fabrik
+        private Vector3[][] copy;
+        private float[][] distances;
+        private bool[] done;
+
+        float threshHold = 0.03f;
+        int maxIterations = 15;
+        int iterations = 15;
 
         #region public
         public void InitLegs(Transform[] LegRoots, Transform[] LegFutureBases, Transform[] LegTargets)
@@ -42,6 +49,16 @@ namespace OctopusController
                 //TODO: initialize anything needed for the FABRIK implementation
             }
             animationRange = Vector3.Distance(_legs[0].Bones[0].position, legFutureBases[0].position);
+
+           // distances = new float[LegRoots.Length];
+           // copy = new Vector3[joints.Length];
+           //
+           // for (int i = 0; i < joints.Length - 1; i++)
+           // {
+           //     distances[i] = Vector3.Distance(joints[i].position, joints[i + 1].position);
+           // }
+
+
         }
 
         public void InitTail(Transform TailBase)
