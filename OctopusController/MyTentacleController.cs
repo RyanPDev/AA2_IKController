@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,9 +12,9 @@ namespace OctopusController
     {
         TentacleMode tentacleMode;
         Transform[] _bones;
-        Transform _endEffectorSphere;
-        //List<Transform> list;
-
+        public Transform _endEffectorSphere;
+        List<Transform> list = new List<Transform>();
+        Transform child;
         public Transform[] Bones { get => _bones; }
 
         //Exercise 1.
@@ -23,27 +23,47 @@ namespace OctopusController
             //TODO: add here whatever is needed to find the bones forming the tentacle for all modes
             //you may want to use a list, and then convert it to an array and save it into _bones
 
-            /////////////////PREGUNTA!!!!!!!!!!!!/////////
             tentacleMode = mode;
 
             switch (tentacleMode)
             {
                 case TentacleMode.LEG:
                     //TODO: in _endEffectorsphere you keep a reference to the base of the leg
+                    child = root.GetChild(0);
+                    list.Add(child);
+
+                    while (child.childCount == 2)
+                    {
+                        child = child.GetChild(1);
+                        list.Add(child);
+                    }
+                    _bones = list.ToArray<Transform>();
+                    _endEffectorSphere = _bones[_bones.Length - 1];
+                    break;
                 case TentacleMode.TAIL:
                     //TODO: in _endEffectorsphere you keep a reference to the red sphere
-                    _bones = root.GetComponentsInChildren<Transform>();
+                    // _bones = root.GetComponentsInChildren<Transform>();
+                    child = root.GetComponent<Transform>();
 
+                    while (child.childCount == 2)
+                    {
+                        list.Add(child);
+                        child = child.GetChild(1);
+                    }
+                    _bones = list.ToArray<Transform>();
                     _endEffectorSphere = _bones[_bones.Length - 1];
-                    Debug.Log(_endEffectorSphere.name);
-
                     break;
                 case TentacleMode.TENTACLE:
                     //TODO: in _endEffectorsphere you keep a reference to the sphere with a collider attached to the endEffector
-                    _bones = root.GetComponentsInChildren<Transform>();
-
-                    _endEffectorSphere = _bones[_bones.Length - 2];
-                    Debug.Log(_endEffectorSphere.name);
+                    //_bones = root.GetComponentsInChildren<Transform>();
+                    child = root.GetChild(0).GetChild(0).GetChild(0);
+                    while (child.childCount == 1)
+                    {
+                        list.Add(child);
+                        child = child.GetChild(0);
+                    }
+                    _bones = list.ToArray<Transform>();
+                    _endEffectorSphere = _bones[_bones.Length - 1];
                     break;
             }
             return Bones;
