@@ -39,7 +39,7 @@ namespace OctopusController
         MyTentacleController _tail;
         Vector3 Axis = new Vector3(1, 1, 1);
         float angle;
-        float MinAngle = 0;
+        float MinAngle = -360;
         float MaxAngle = 360;
         public ErrorFunction ErrorFunction;
         public float[] Solution = null;
@@ -48,7 +48,7 @@ namespace OctopusController
         [Range(0, 1f)]
         public float DeltaGradient = 0.1f; // Used to simulate gradient (degrees)
         [Range(0, 100f)]
-        public float LearningRate = 0.1f; // How much we move depending on the gradient
+        public float LearningRate = 0.2f; // How much we move depending on the gradient
 
         [Space()]
         [Range(0, 0.25f)]
@@ -128,7 +128,7 @@ namespace OctopusController
             {
                 ZeroEuler[i] = _tail.Bones[i].localEulerAngles;
                 Solution[i] = ZeroEuler[i].x;
-                StartOffset[i] = _tail.Bones[i].localPosition * 320;
+                StartOffset[i] = _tail.Bones[i].localPosition * 0.32f;
             }
         }
 
@@ -237,13 +237,16 @@ namespace OctopusController
             Vector3 prevPoint = _tail.Bones[0].position;
 
             // Takes object initial rotation into account
-            Quaternion rotation = tailTarget.rotation;
+            Quaternion rotation = new Quaternion(0,0,0,1);
+                
 
             //TODO
             for (int i = 1; i < _tail.Bones.Length; i++)
             {
                 rotation *= Quaternion.AngleAxis(Solution[i - 1], Axis);
+                Vector3 aux = prevPoint;
                 prevPoint += rotation * StartOffset[i];
+                Debug.DrawLine(aux, prevPoint);
             }
 
             // The end of the effector
