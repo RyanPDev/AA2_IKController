@@ -43,12 +43,14 @@ namespace OctopusController
                 case TentacleMode.TAIL:
                     //TODO: in _endEffectorsphere you keep a reference to the red sphere
                     // _bones = root.GetComponentsInChildren<Transform>();
-                    child = root.GetComponent<Transform>();
+                    list.Add(root);
+                    child = root.GetChild(1);
+                    list.Add(child);
 
                     while (child.childCount == 2)
                     {
-                        list.Add(child);
                         child = child.GetChild(1);
+                        list.Add(child);
                     }
                     _bones = list.ToArray<Transform>();
                     _endEffectorSphere = _bones[_bones.Length - 1];
