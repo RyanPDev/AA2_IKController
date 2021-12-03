@@ -111,18 +111,6 @@ namespace OctopusController
             Solution = new float[_tail.Bones.Length];
             StartOffset = new Vector3[_tail.Bones.Length];
             Axis = new Vector3[_tail.Bones.Length];
-        //    MinAngle = new float[_tail.Bones.Length];
-        //    MaxAngle = new float[_tail.Bones.Length];
-        //    MinAngle[0] = -90;
-        //    MaxAngle[0] = 90;
-        //    MinAngle[1] = 290;
-        //    MaxAngle[1] = 340;
-        //    MinAngle[2] = 246;
-        //    MaxAngle[2] = 325;
-        //    MinAngle[3] = 280;
-        //    MaxAngle[3] = 367;
-        //    MinAngle[4] = 324;
-        //    MaxAngle[4] = 374;
 
             for (int i = 0; i < _tail.Bones.Length; i++)
             {
@@ -203,11 +191,6 @@ namespace OctopusController
             {
                 float gradient = CalculateGradient(tailTarget.position, Solution, i, DeltaGradient);
                 Solution[i] -= LearningRate * gradient;
-                //float clampedAngle = ClampAngle(Solution[i]);
-
-                //Solution[i] = Mathf.Clamp(Solution[i], _tail.Bones[i], _tail.Bones[i])
-                //ClampAngle(Solution[i]);
-                //Solution[i] = Mathf.Clamp(Solution[i], MinAngle[i], MaxAngle[i]);
 
                 if (Axis[i].x == 1) _tail.Bones[i].localEulerAngles = new Vector3(Solution[i], 0, 0);
                 if (Axis[i].y == 1) _tail.Bones[i].localEulerAngles = new Vector3(0, Solution[i], 0);
@@ -221,7 +204,6 @@ namespace OctopusController
             float angle = _Solution[i];
             float f_x = DistanceFromTarget(target, _Solution);
             _Solution[i] += delta;
-           // _Solution[i] = Mathf.Clamp(Solution[i], MinAngle[i], MaxAngle[i]);
             float f_xFinal = DistanceFromTarget(target, _Solution);
             _Solution[i] = angle;
 
@@ -256,12 +238,6 @@ namespace OctopusController
             return new PositionRotation(prevPoint, rotation);
         }
 
-        //float ClampAngle(float angle, float delta = 0)
-        //{
-        //    return Mathf.Clamp(angle + delta, MinAngle, MaxAngle);
-        //}
-
-        //TODO: implement fabrik method to move legs 
         private void updateLegs()
         {
             for (int i = 0; i < _legs.Length; i++)
@@ -305,8 +281,6 @@ namespace OctopusController
                     iterations--;
                 }
 
-                //for (int j = 0; j < copy[i].Length - 1; j++)
-                //    Debug.DrawLine(copy[i], copy[i + 1], Color.green, 0, false);
                 iterations = maxIterations;
 
                 // Update original joint rotations
@@ -324,8 +298,6 @@ namespace OctopusController
                     //angle *= Mathf.Rad2Deg;
 
                     _legs[i].Bones[j].Rotate(axis, angle, Space.World);
-
-
                 }
             }
 
