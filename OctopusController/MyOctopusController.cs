@@ -17,7 +17,7 @@ namespace OctopusController
         int tentacleToMove;
         Transform[] _randomTargets;
         float t = 0, tl = 0;
-        float maxAngle = 10;
+        float maxAngle = 5.3f;
         float minAngle = 0;
 
         float _twistMin, _twistMax, timer, maxTime;
@@ -182,21 +182,19 @@ namespace OctopusController
                                     tpos[i] = _randomTargets[i].position;
                             }
                         }
-                        GetSwing(_tentacles[i].Bones[j].localRotation).ToAngleAxis(out float swingAngle, out Vector3 swingAxis);
+
+                        Quaternion q = GetSwing(_tentacles[i].Bones[j].transform.localRotation);
+                        q = q * new Quaternion(q.x, 0, 0, q.w);
+                        q.ToAngleAxis(out float swingAngle, out Vector3 swingAxis);
+
                         swingAngle = Mathf.Clamp(swingAngle, minAngle, maxAngle);
+                        q = Quaternion.AngleAxis(swingAngle, swingAxis);
 
-                        _tentacles[i].Bones[j].localRotation = Quaternion.AngleAxis(swingAngle, swingAxis);
+                        _tentacles[i].Bones[j].localRotation = new Quaternion(q.x, 0, 0, q.w);
 
-                        //Codi per intentar fixar la rotacio dels joints en un sol pla, no acaba de funcionar del tot bé
+                        //_____________________________________________
 
-                        // Quaternion SwingQuat = GetSwing(_tentacles[i].Bones[j].localRotation);
-                        // SwingQuat.ToAngleAxis(out float SwingAngle, out Vector3 SwingAxis);
-                        //
-                        // SwingAngle = Mathf.Clamp(SwingAngle, minAngle, maxAngle);
-                        //
-                        // SwingQuat = Quaternion.AngleAxis(SwingAngle, SwingAxis);
-                        //
-                        // _tentacles[i].Bones[j].localRotation = new Quaternion(SwingQuat.x, 0, 0, SwingQuat.w);
+
                     }
                 }
 
@@ -207,10 +205,10 @@ namespace OctopusController
             #endregion
         }
 
-       //Quaternion GetCameraRotation(Quaternion q)
-       //{
-       //    return Quaternion.Normalize(new Quaternion(0, 0, 1, 1) * Quaternion.Inverse(new Quaternion(q.x, 0, 0, q.w)));
-       //}
+        Quaternion GetCameraRotation(Quaternion q)
+        {
+            return Quaternion.Normalize(new Quaternion(0, 0, 1, 1) * Quaternion.Inverse(new Quaternion(q.x, 0, 0, q.w)));
+        }
 
 
         Quaternion GetTwist(Quaternion q)
