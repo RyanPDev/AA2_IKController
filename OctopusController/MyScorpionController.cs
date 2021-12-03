@@ -111,18 +111,18 @@ namespace OctopusController
             Solution = new float[_tail.Bones.Length];
             StartOffset = new Vector3[_tail.Bones.Length];
             Axis = new Vector3[_tail.Bones.Length];
-            MinAngle = new float[_tail.Bones.Length];
-            MaxAngle = new float[_tail.Bones.Length];
-            MinAngle[0] = -90;
-            MaxAngle[0] = 90;
-            MinAngle[1] = 290;
-            MaxAngle[1] = 340;
-            MinAngle[2] = 246;
-            MaxAngle[2] = 325;
-            MinAngle[3] = 280;
-            MaxAngle[3] = 367;
-            MinAngle[4] = 324;
-            MaxAngle[4] = 374;
+        //    MinAngle = new float[_tail.Bones.Length];
+        //    MaxAngle = new float[_tail.Bones.Length];
+        //    MinAngle[0] = -90;
+        //    MaxAngle[0] = 90;
+        //    MinAngle[1] = 290;
+        //    MaxAngle[1] = 340;
+        //    MinAngle[2] = 246;
+        //    MaxAngle[2] = 325;
+        //    MinAngle[3] = 280;
+        //    MaxAngle[3] = 367;
+        //    MinAngle[4] = 324;
+        //    MaxAngle[4] = 374;
 
             for (int i = 0; i < _tail.Bones.Length; i++)
             {
@@ -131,12 +131,12 @@ namespace OctopusController
                 {
                     Axis[i] = new Vector3(1, 0, 0);
                     Solution[i] = _tail.Bones[i].localEulerAngles.x;
-                    Debug.Log(Solution[i]);
+                   // Debug.Log(Solution[i]);
                 }
                 else
                 {
-                    Axis[i] = new Vector3(0, 1, 0);
-                    Solution[i] = _tail.Bones[i].localEulerAngles.y;
+                    Axis[i] = new Vector3(0, 0, 1);
+                    Solution[i] = _tail.Bones[i].localEulerAngles.z;
                 }
             }
         }
@@ -149,7 +149,7 @@ namespace OctopusController
             {
                 if (ErrorFunction(tailTarget.position, Solution) > StopThreshold)
                 {
-                    Debug.Log("Distance = " + Vector3.Distance(target.position, _tail._endEffectorSphere.position));
+                   // Debug.Log("Distance = " + Vector3.Distance(target.position, _tail._endEffectorSphere.position));
                     updateTail();
                 }
             }
@@ -207,11 +207,11 @@ namespace OctopusController
 
                 //Solution[i] = Mathf.Clamp(Solution[i], _tail.Bones[i], _tail.Bones[i])
                 //ClampAngle(Solution[i]);
-                float clampedAngle = Mathf.Clamp(Solution[i], MinAngle[i], MaxAngle[i]);
+                //Solution[i] = Mathf.Clamp(Solution[i], MinAngle[i], MaxAngle[i]);
 
-                if (Axis[i].x == 1) _tail.Bones[i].localEulerAngles = new Vector3(clampedAngle, 0, 0);
-                if (Axis[i].y == 1) _tail.Bones[i].localEulerAngles = new Vector3(0, clampedAngle, 0);
-                if (Axis[i].z == 1) _tail.Bones[i].localEulerAngles = new Vector3(0, 0, clampedAngle);
+                if (Axis[i].x == 1) _tail.Bones[i].localEulerAngles = new Vector3(Solution[i], 0, 0);
+                if (Axis[i].y == 1) _tail.Bones[i].localEulerAngles = new Vector3(0, Solution[i], 0);
+                if (Axis[i].z == 1) _tail.Bones[i].localEulerAngles = new Vector3(0, 0, Solution[i]);
             }
         }
 
@@ -221,8 +221,8 @@ namespace OctopusController
             float angle = _Solution[i];
             float f_x = DistanceFromTarget(target, _Solution);
             _Solution[i] += delta;
+           // _Solution[i] = Mathf.Clamp(Solution[i], MinAngle[i], MaxAngle[i]);
             float f_xFinal = DistanceFromTarget(target, _Solution);
-
             _Solution[i] = angle;
 
             return (f_xFinal - f_x) / delta;
@@ -248,7 +248,7 @@ namespace OctopusController
                 rotation *= Quaternion.AngleAxis(_Solution[i - 1], Axis[i - 1]);
                 Vector3 aux = prevPoint + rotation * StartOffset[i];
 
-                Debug.DrawLine(aux, prevPoint);
+                //Debug.DrawLine(aux, prevPoint);
                 prevPoint = aux;
             }
 

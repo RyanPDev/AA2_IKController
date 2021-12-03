@@ -10,33 +10,32 @@ namespace OctopusController
 
     public class MyOctopusController
     {
-
         MyTentacleController[] _tentacles = new MyTentacleController[4];
 
         Transform _currentRegion;
         Transform _target;
-
-        Transform[] _randomTargets;// = new Transform[4];
-
-
-        float maxAngle = 10;
-
+        int tentacleToMove;
+        Transform[] _randomTargets;
+        float t = 0, tl = 0;
+        float maxAngle = 5.3f;
         float minAngle = 0;
 
-        float _twistMin, _twistMax;
+        float _twistMin, _twistMax, timer, maxTime;
         float _swingMin, _swingMax;
 
         //todo: add here anything that you need
 
-        private bool ScorpionHasShot = false;
+        private bool ScorpionHasShot = false, LerpingBack = false;
         // Max number of tries before the system gives up (Maybe 10 is too high?)
+
         private int _mtries = 10;
+
         // The number of tries the system is at now
         private int _tries = 0;
         private float angle = 0f, distance = 0f;
         private Vector3 axis = Vector3.zero;
+        Vector3 _auxTarget, _auxTarget2;
         private float[][] _theta;
-        //private readonly float _epsilon = 0.1f;
         private Vector3[] tpos;
 
         #region public methods
@@ -59,110 +58,159 @@ namespace OctopusController
             _theta = new float[tentacleRoots.Length][];
 
             _randomTargets = randomTargets;
-            // foreach (Transform t in tentacleRoots)
+            maxTime = 3;
+            timer = maxTime;
             for (int i = 0; i < tentacleRoots.Length; i++)
             {
                 _tentacles[i] = new MyTentacleController();
                 _tentacles[i].LoadTentacleJoints(tentacleRoots[i], TentacleMode.TENTACLE);
 
-                //TODO: initialize any variables needed in ccd
                 _theta[i] = new float[_tentacles[i].Bones.Length];
                 tpos[i] = _randomTargets[i].transform.position;
-
             }
-           // Debug.LogError("ERROR");
-
 
             //TODO: use the regions however you need to make sure each tentacle stays in its region
 
-            //////////PREGUNTAAAAAAA////////
+
         }
 
         public void NotifyTarget(Transform target, Transform region)
         {
-            _currentRegion = region;
-            _target = target;
+            if (region.childCount == 1)
+            {
+                _currentRegion = region;
+                _target = target;
+
+                for (int i = 0; i < _tentacles.Length; i++)
+                {
+                    if (region.GetChild(0) == _randomTargets[i])
+                    {
+                        tentacleToMove = i;
+                        _auxTarget2 = _randomTargets[tentacleToMove].position;
+                    }
+                }
+            }
+
         }
 
         public void NotifyShoot()
         {
-            //TODO. what happens here?
+            ScorpionHasShot = true;
             Debug.Log("Shoot");
         }
 
         public void UpdateTentacles()
         {
-            //TODO: implement logic for the correct tentacle arm to stop the ball and implement CCD method
-
             update_ccd();
         }
 
         #endregion
 
-
         #region private and internal methods
-
 
         void update_ccd()
         {
-            // if the target hasn't been reached
-            if (!ScorpionHasShot)
+            if (ScorpionHasShot)
             {
-                // if the Max number of tries hasn't been reached
-                if (_tries <= _mtries)
+                timer -= Time.deltaTime;
+                t += Time.deltaTime * 3;
+                _auxTarget = Vector3.Lerp(_auxTarget2, _target.position, t);
+                if (timer <= 0)
+                {
+                    t = 0;
+                    tl = 0;
+                    LerpingBack = true;
+                    ScorpionHasShot = false;
+                    timer = maxTime;
+                }
+            }
+            if (LerpingBack)
+                tl += Time.deltaTime * 3;
+
+            // if the Max number of tries hasn't been reached
+            if (_tries <= _mtries)
+            {
+                for (int i = 0; i < _tentacles.Length; i++)
                 {
                     // starting from the second last joint (the last being the end effector)
                     // going back up to the root
-                    for (int i = 0; i < _tentacles.Length; i++)
+                    for (int j = _tentacles[i].Bones.Length - 2; j >= 0; j--)
                     {
-                        for (int j = _tentacles[i].Bones.Length - 2; j >= 0; j--)
+                        // The vector from the ith joint to the end effector
+                        Vector3 r1 = _tentacles[i]._endEffectorSphere.transform.position - _tentacles[i].Bones[j].transform.position;
+
+                        // The vector from the ith joint to the target
+                        Vector3 r2 = tpos[i] - _tentacles[i].Bones[j].transform.position;
+
+                        // to avoid dividing by tiny numbers
+                        if (r1.magnitude * r2.magnitude >= 0.001f)
                         {
-                            // The vector from the ith joint to the end effector
-                            Vector3 r1 = _tentacles[i]._endEffectorSphere.transform.position - _tentacles[i].Bones[j].transform.position;
+                            angle = Vector3.Angle(r1, r2);
+                            axis = Vector3.Cross(r1, r2).normalized;
+                        }
 
-                            // The vector from the ith joint to the target
-                            Vector3 r2 = tpos[i] - _tentacles[i].Bones[j].transform.position;
+                        _theta[i][j] = SimpleAngle(angle);
 
-                            // to avoid dividing by tiny numbers
-                            if (r1.magnitude * r2.magnitude <= 0.001f)
-                            {
-                                // cos ? sin? 
-                                // TODO3
-                            }
-                            else
-                            {
-                                angle = Vector3.Angle(r1, r2);
-                                axis = Vector3.Cross(r1, r2).normalized;
-                            }
+                        // rotate the ith joint along the axis by theta degrees in the world space.
+                        _tentacles[i].Bones[j].transform.Rotate(axis, _theta[i][j], Space.World);
 
-                            _theta[i][j] = SimpleAngle(angle);
+                        // find the difference in the positions of the end effector and the target
+                        distance = Vector3.Distance(tpos[i], _tentacles[i]._endEffectorSphere.transform.position);
 
-                            // rotate the ith joint along the axis by theta degrees in the world space.
-                            _tentacles[i].Bones[j].transform.Rotate(axis, _theta[i][j], Space.World);
-
-                            // find the difference in the positions of the end effector and the target
-                            distance = Vector3.Distance(tpos[i], _tentacles[i]._endEffectorSphere.transform.position);
-
+                        if (ScorpionHasShot && tentacleToMove == i)
+                        {
                             // the target has moved, reset tries to 0 and change tpos
-                            if (_randomTargets[i].transform.position != tpos[i])
+                            if (_auxTarget != tpos[i])
                             {
                                 _tries = 0;
-                                tpos[i] = _randomTargets[i].transform.position;
+                                tpos[i] = _auxTarget;
                             }
-
-                            GetSwing(_tentacles[i].Bones[j].transform.localRotation).ToAngleAxis(out float swingAngle, out Vector3 swingAxis);
-                            swingAngle = Mathf.Clamp(swingAngle, minAngle, maxAngle);
-                            _tentacles[i].Bones[j].localRotation = Quaternion.AngleAxis(swingAngle, swingAxis);
                         }
-                    }
+                        else
+                        {
+                            // the target has moved, reset tries to 0 and change tpos
+                            if (_randomTargets[i].position != tpos[i])
+                            {
+                                _tries = 0;
+                                if (LerpingBack && tentacleToMove == i)
+                                {
+                                    tpos[i] = Vector3.Lerp(_auxTarget, _randomTargets[i].position, tl);
+                                    if (tl >= 1)
+                                        LerpingBack = false;
+                                }
+                                else
+                                    tpos[i] = _randomTargets[i].position;
+                            }
+                        }
 
-                    // increment tries
-                    _tries++;
+                        Quaternion q = GetSwing(_tentacles[i].Bones[j].transform.localRotation);
+                        q = q * new Quaternion(q.x, 0, 0, q.w);
+                        q.ToAngleAxis(out float swingAngle, out Vector3 swingAxis);
+
+                        swingAngle = Mathf.Clamp(swingAngle, minAngle, maxAngle);
+                        q = Quaternion.AngleAxis(swingAngle, swingAxis);
+
+                        _tentacles[i].Bones[j].localRotation = new Quaternion(q.x, 0, 0, q.w);
+
+                        //_____________________________________________
+
+
+                    }
                 }
+
+                // increment tries
+                _tries++;
             }
 
             #endregion
         }
+
+        Quaternion GetCameraRotation(Quaternion q)
+        {
+            return Quaternion.Normalize(new Quaternion(0, 0, 1, 1) * Quaternion.Inverse(new Quaternion(q.x, 0, 0, q.w)));
+        }
+
+
         Quaternion GetTwist(Quaternion q)
         {
             return Quaternion.Normalize(new Quaternion(0, q.y, 0, q.w));
