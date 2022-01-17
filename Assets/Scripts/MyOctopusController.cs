@@ -46,6 +46,7 @@ namespace OctopusController
         public float SwingMin { set => _swingMin = value; }
         public float SwingMax { set => _swingMax = value; }
 
+
         public void TestLogging(string objectName)
         {
             Debug.Log("Hello, we are Marc and Ryan and we're initializing our Octopus Controller in object " + objectName);
@@ -68,10 +69,6 @@ namespace OctopusController
                 _theta[i] = new float[_tentacles[i].Bones.Length];
                 tpos[i] = _randomTargets[i].transform.position;
             }
-
-            //TODO: use the regions however you need to make sure each tentacle stays in its region
-
-
         }
 
         public void NotifyTarget(Transform target, Transform region)
@@ -210,7 +207,6 @@ namespace OctopusController
         //{
         //    return Quaternion.Normalize(new Quaternion(0, 0, 1, 1) * Quaternion.Inverse(new Quaternion(q.x, 0, 0, q.w)));
         //}
-
 
         Quaternion GetTwist(Quaternion q)
         {
