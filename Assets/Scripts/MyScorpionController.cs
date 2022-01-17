@@ -42,9 +42,10 @@ namespace OctopusController
 
         public float StopThreshold = 0.1f; // If closer than this, it stops
         public float SlowdownThreshold = 0.25f; // If closer than this, it linearly slows down
-
-        
-
+        RaycastHit hit;
+        int layerMask = 1 << 0;
+        float angleAccum = 0;
+        float angle;
         // The offset at resting position
         Vector3[] StartOffset;
         const float INITIAL_OFFSET = 2.034429f;
@@ -64,11 +65,13 @@ namespace OctopusController
         private Vector3[][] copy;
         private float[][] distances;
         //   private bool[] done;
-        Vector3 lastFrameVector;
+        Vector3 lastFrameFordwardVector;
+        Vector3 lastFrameRightVector;
 
         float threshHold = 0.03f;
         int maxIterations = 15;
         int iterations = 15;
+        const float ANGLE_THRESHOLD = 10;
 
         #region public
 
@@ -150,7 +153,9 @@ namespace OctopusController
         //TODO: Notifies the start of the walking animation
         public void NotifyStartWalk()
         {
-            lastFrameVector = legFutureBases[0].position - legFutureBases[1].position;
+            lastFrameFordwardVector = legFutureBases[0].position - legFutureBases[1].position;
+            lastFrameRightVector = (legFutureBases[0].position + legFutureBases[1].position) * 0.5f - (legFutureBases[4].position + legFutureBases[5].position) * 0.5f;
+            //(legFutureBases[0].position + legFutureBases[1].position) * 0.5f - (legFutureBases[4].position + legFutureBases[5].position) * 0.5f;
         }
 
         //TODO: create the apropiate animations and update the IK from the legs and tail
@@ -171,36 +176,46 @@ namespace OctopusController
             for (int i = 0; i < _legs.Length; i++)
             {
                 accum += _legs[i].Bones[0].localPosition.y;
+
             }
             accum /= _legs.Length;
-
             Body.localPosition = new Vector3(Body.localPosition.x, accum, Body.localPosition.z);
-            // Quaternion yRotation = Body.rotation;
-            //yRotation.y = Quaternion.FromToRotation(Vector3.right,_legs[0].Bones[0].localPosition - _legs[1].Bones[0].localPosition).y;
-            Vector3 currentFrameVector = legFutureBases[0].position - legFutureBases[1].position;
-           // currentFrameVector.x = 0;
-           // currentFrameVector.z = 0;
-            float angle = Vector3.SignedAngle(lastFrameVector, currentFrameVector, Body.forward);
-            
-                Debug.Log(angle);
-                lefFutureBaseParent.localRotation *= Quaternion.AngleAxis(-angle, Body.forward);
-                Body.localRotation *= Quaternion.AngleAxis(angle, Body.forward);
 
-            lastFrameVector = legFutureBases[0].position - legFutureBases[1].position;
-       
+           
+            Vector3 currentFrameVector = legFutureBases[0].position - legFutureBases[1].position;
+            Vector3 currentFrameRightVector = (legFutureBases[0].position + legFutureBases[1].position) * 0.5f - (legFutureBases[4].position + legFutureBases[5].position) * 0.5f;
+
+            
+            angle = Vector3.SignedAngle(lastFrameFordwardVector, currentFrameVector, Body.forward);
+            Debug.Log("forward: " + angle);
+
+            lefFutureBaseParent.localRotation = Quaternion.Normalize(Quaternion.AngleAxis(-angle, Body.forward));
+            Body.localRotation = Quaternion.Normalize(Quaternion.AngleAxis(angle, Body.forward));
+
+           
+            angle = Vector3.SignedAngle(lastFrameRightVector, currentFrameRightVector, Body.right);
+            Debug.Log("right: " + angle);
+
+            lefFutureBaseParent.localRotation *= Quaternion.Normalize(Quaternion.AngleAxis(-angle, Body.right));
+            Body.localRotation *= Quaternion.Normalize(Quaternion.AngleAxis(angle, Body.right));
+           
+            
+
+            // lastFrameFordwardVector = currentFrameVector;
+            // lastFrameRightVector = currentFrameRightVector;
+
         }
         private void updateLegPos()
         {
             //check for the distance to the futureBase, then if it's too far away start moving the leg towards the future base position
             //
-            int layerMask = 1 << 0;
+
             for (int i = 0; i < _legs.Length; i++)
             {
-                if (Physics.Raycast(new Vector3(legFutureBases[i].position.x, 100, legFutureBases[i].position.z), Vector3.down, out RaycastHit hit, Mathf.Infinity, layerMask))
+                if (Physics.Raycast(new Vector3(legFutureBases[i].position.x, 100, legFutureBases[i].position.z), Vector3.down, out hit, Mathf.Infinity, layerMask))
                 {
                     legFutureBases[i].position = hit.point;
                 }
-
                 if (Vector3.Distance(_legs[i].Bones[0].position, legFutureBases[i].position) > animationRange && !legMoving[i])
                 {
                     legMoving[i] = true;
@@ -213,16 +228,16 @@ namespace OctopusController
                 {
                     t[i] += Time.deltaTime * 5;
 
-                    Vector3 a =Vector3.zero;
+                    Vector3 a = Vector3.zero;
                     a = Vector3.Lerp(auxPrevBases[i].position, auxFutureBases[i].position, t[i]);
-                   
+
                     if (t[i] < .5f)
                     {
                         a.y = Vector3.Lerp(auxPrevBases[i].position, auxMidPointBases[i], t[i] * 2).y;
                     }
                     else
                     {
-                        a.y = Vector3.Lerp(auxMidPointBases[i], auxFutureBases[i].position, t[i] - (1-t[i])).y;
+                        a.y = Vector3.Lerp(auxMidPointBases[i], auxFutureBases[i].position, t[i] - (1 - t[i])).y;
                     }
 
                     _legs[i].Bones[0].position = a;
@@ -252,11 +267,11 @@ namespace OctopusController
 
         public float CalculateGradient(Vector3 target, float[] _Solution, int i, float delta)
         {
-            float angle = _Solution[i];
+            float _angle = _Solution[i];
             float f_x = DistanceFromTarget(target, _Solution);
             _Solution[i] += delta;
             float f_xFinal = DistanceFromTarget(target, _Solution);
-            _Solution[i] = angle;
+            _Solution[i] = _angle;
 
             return (f_xFinal - f_x) / delta;
         }
@@ -344,7 +359,7 @@ namespace OctopusController
 
                     Vector3 axis = Vector3.Cross(currentDirection, endDirection).normalized;
 
-                    float angle = Mathf.Acos((Vector3.Dot(currentDirection, endDirection))) * Mathf.Rad2Deg;
+                    angle = Mathf.Acos((Vector3.Dot(currentDirection, endDirection))) * Mathf.Rad2Deg;
 
                     _legs[i].Bones[j].Rotate(axis, angle, Space.World);
                 }
