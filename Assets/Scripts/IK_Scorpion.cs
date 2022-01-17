@@ -31,6 +31,7 @@ public class IK_Scorpion : MonoBehaviour
     {
         _myController.InitLegs(legs,futureLegBases,legTargets);
         _myController.InitTail(tail);
+        _myController.InitBody(Body);
 
     }
 

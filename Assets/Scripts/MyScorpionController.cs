@@ -37,21 +37,25 @@ namespace OctopusController
         public ErrorFunction ErrorFunction;
         public float[] Solution = null;
         float[] t;
-        float[] tY;
         public float DeltaGradient = 0.1f; // Used to simulate gradient (degrees)
         public float LearningRate = 10f; // How much we move depending on the gradient
 
         public float StopThreshold = 0.1f; // If closer than this, it stops
         public float SlowdownThreshold = 0.25f; // If closer than this, it linearly slows down
 
+        
+
         // The offset at resting position
         Vector3[] StartOffset;
-
+        const float INITIAL_OFFSET = 2.034429f;
         //LEGS
         Transform[] legTargets;
         Transform[] legFutureBases;
         Transform[] auxFutureBases;
         Transform[] auxPrevBases;
+        Transform lefFutureBaseParent;
+        Transform Body;
+        Vector3[] auxMidPointBases;
         MyTentacleController[] _legs = new MyTentacleController[6];
         float animationRange;
         bool[] legMoving;
@@ -60,6 +64,7 @@ namespace OctopusController
         private Vector3[][] copy;
         private float[][] distances;
         //   private bool[] done;
+        Vector3 lastFrameVector;
 
         float threshHold = 0.03f;
         int maxIterations = 15;
@@ -74,8 +79,10 @@ namespace OctopusController
             legTargets = new Transform[LegTargets.Length];
             auxFutureBases = new Transform[LegFutureBases.Length];
             auxPrevBases = new Transform[LegFutureBases.Length];
+            auxMidPointBases = new Vector3[LegFutureBases.Length];
             legMoving = new bool[LegRoots.Length];
             legFutureBases = LegFutureBases;
+            lefFutureBaseParent = legFutureBases[0].parent;
             legTargets = LegTargets;
             distances = new float[LegRoots.Length][];
             copy = new Vector3[LegRoots.Length][];
@@ -92,8 +99,14 @@ namespace OctopusController
                 copy[i] = new Vector3[_legs[i].Bones.Length];
                 for (int j = 0; j < _legs[i].Bones.Length - 1; j++)
                     distances[i][j] = Vector3.Distance(_legs[i].Bones[j].position, _legs[i].Bones[j + 1].position);
+
+
             }
             animationRange = 0.5f;
+        }
+        public void InitBody(Transform BodyBase)
+        {
+            Body = BodyBase;
         }
 
         public void InitTail(Transform TailBase)
@@ -137,19 +150,45 @@ namespace OctopusController
         //TODO: Notifies the start of the walking animation
         public void NotifyStartWalk()
         {
-
+            lastFrameVector = legFutureBases[0].position - legFutureBases[1].position;
         }
 
         //TODO: create the apropiate animations and update the IK from the legs and tail
 
         public void UpdateIK()
         {
+            updateBody();
             updateLegPos();
             updateLegs();
         }
         #endregion
 
         #region private
+
+        private void updateBody()
+        {
+            float accum = 0;
+            for (int i = 0; i < _legs.Length; i++)
+            {
+                accum += _legs[i].Bones[0].localPosition.y;
+            }
+            accum /= _legs.Length;
+
+            Body.localPosition = new Vector3(Body.localPosition.x, accum, Body.localPosition.z);
+            // Quaternion yRotation = Body.rotation;
+            //yRotation.y = Quaternion.FromToRotation(Vector3.right,_legs[0].Bones[0].localPosition - _legs[1].Bones[0].localPosition).y;
+            Vector3 currentFrameVector = legFutureBases[0].position - legFutureBases[1].position;
+           // currentFrameVector.x = 0;
+           // currentFrameVector.z = 0;
+            float angle = Vector3.SignedAngle(lastFrameVector, currentFrameVector, Body.forward);
+            
+                Debug.Log(angle);
+                lefFutureBaseParent.localRotation *= Quaternion.AngleAxis(-angle, Body.forward);
+                Body.localRotation *= Quaternion.AngleAxis(angle, Body.forward);
+
+            lastFrameVector = legFutureBases[0].position - legFutureBases[1].position;
+       
+        }
         private void updateLegPos()
         {
             //check for the distance to the futureBase, then if it's too far away start moving the leg towards the future base position
@@ -167,25 +206,24 @@ namespace OctopusController
                     legMoving[i] = true;
                     auxFutureBases[i] = legFutureBases[i];
                     auxPrevBases[i] = _legs[i].Bones[0];
+                    auxMidPointBases[i] = auxPrevBases[i].position + ((auxFutureBases[i].position - auxPrevBases[i].position) * 0.5f) + new Vector3(0, .1f, 0);
                 }
 
                 if (legMoving[i])
                 {
                     t[i] += Time.deltaTime * 5;
 
-                    Vector3 a = _legs[i].Bones[0].position;
+                    Vector3 a =Vector3.zero;
                     a = Vector3.Lerp(auxPrevBases[i].position, auxFutureBases[i].position, t[i]);
-
+                   
                     if (t[i] < .5f)
                     {
-                        a.y = Vector3.Lerp(auxPrevBases[i].position, auxFutureBases[i].position + new Vector3(0, .5f, 0), t[i] * 2).y;
+                        a.y = Vector3.Lerp(auxPrevBases[i].position, auxMidPointBases[i], t[i] * 2).y;
                     }
                     else
                     {
-                        a.y = Vector3.Lerp(auxPrevBases[i].position + new Vector3(0, .5f, 0) * .5f, auxFutureBases[i].position, t[i]).y;
+                        a.y = Vector3.Lerp(auxMidPointBases[i], auxFutureBases[i].position, t[i] - (1-t[i])).y;
                     }
-
-                    //a.y += ((Mathf.Sin(t[i] * Mathf.PI) / 2) + 0.5f) * 0.1f ;
 
                     _legs[i].Bones[0].position = a;
 
