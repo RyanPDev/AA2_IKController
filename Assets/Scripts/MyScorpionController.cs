@@ -44,7 +44,7 @@ namespace OctopusController
         public float SlowdownThreshold = 0.25f; // If closer than this, it linearly slows down
         RaycastHit hit;
         int layerMask = 1 << 0;
-        float angleAccum = 0;
+    
         float angle;
         // The offset at resting position
         Vector3[] StartOffset;
@@ -59,7 +59,8 @@ namespace OctopusController
         Transform Body;
         Vector3[] auxMidPointBases;
         MyTentacleController[] _legs = new MyTentacleController[6];
-        float animationRange;
+        public float animationRange = 0.4f;
+        public float legLerpSpeed = 7;
         bool[] legMoving;
 
         ////Fabrik
@@ -105,7 +106,6 @@ namespace OctopusController
                     distances[i][j] = Vector3.Distance(_legs[i].Bones[j].position, _legs[i].Bones[j + 1].position);
                 }
             }
-            animationRange = 0.5f;
         }
 
         public void InitBody(Transform BodyBase)
@@ -204,15 +204,23 @@ namespace OctopusController
                 }
                 if (Vector3.Distance(_legs[i].Bones[0].position, legFutureBases[i].position) > animationRange && !legMoving[i])
                 {
-                    legMoving[i] = true;
-                    auxFutureBases[i] = legFutureBases[i];
-                    auxPrevBases[i] = _legs[i].Bones[0];
-                    auxMidPointBases[i] = auxPrevBases[i].position + ((auxFutureBases[i].position - auxPrevBases[i].position) * 0.5f) + new Vector3(0, .1f, 0);
+                    int a = i - 2;
+                    if(a<0)
+                    {
+                        a = 6 + a;
+                    }
+                    if ( !legMoving[a] && !legMoving[(i + 2) % 5])
+                    {
+                        legMoving[i] = true;
+                        auxFutureBases[i] = legFutureBases[i];
+                        auxPrevBases[i] = _legs[i].Bones[0];
+                        auxMidPointBases[i] = auxPrevBases[i].position + ((auxFutureBases[i].position - auxPrevBases[i].position) * 0.5f) + new Vector3(0, .1f, 0);
+                    }
                 }
 
                 if (legMoving[i])
                 {
-                    t[i] += Time.deltaTime * 5;
+                    t[i] += Time.deltaTime * legLerpSpeed;
 
                     Vector3 a = Vector3.zero;
                     a = Vector3.Lerp(auxPrevBases[i].position, auxFutureBases[i].position, t[i]);
