@@ -59,10 +59,7 @@ public class IK_tentacles : MonoBehaviour
         _myController.TwistMin = _twistMin;
         _myController.SwingMax = _swingMax;
         _myController.SwingMin = _swingMin;
-
     }
-
-
 
     // Update is called once per frame
     void Update()

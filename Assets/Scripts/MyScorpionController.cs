@@ -44,13 +44,14 @@ namespace OctopusController
         public float SlowdownThreshold = 0.25f; // If closer than this, it linearly slows down
         RaycastHit hit;
         int layerMask = 1 << 0;
-        float angleAccum = 0;
+    
         float angle;
         // The offset at resting position
         Vector3[] StartOffset;
         const float INITIAL_OFFSET = 2.034429f;
         //LEGS
         Transform[] legTargets;
+        Transform[] initLegTargets;
         Transform[] legFutureBases;
         Transform[] auxFutureBases;
         Transform[] auxPrevBases;
@@ -58,20 +59,19 @@ namespace OctopusController
         Transform Body;
         Vector3[] auxMidPointBases;
         MyTentacleController[] _legs = new MyTentacleController[6];
-        float animationRange;
+        public float animationRange = 0.4f;
+        public float legLerpSpeed = 7;
         bool[] legMoving;
 
         ////Fabrik
         private Vector3[][] copy;
         private float[][] distances;
-        //   private bool[] done;
         Vector3 lastFrameFordwardVector;
         Vector3 lastFrameRightVector;
 
         float threshHold = 0.03f;
         int maxIterations = 15;
         int iterations = 15;
-        const float ANGLE_THRESHOLD = 10;
 
         #region public
 
@@ -80,6 +80,7 @@ namespace OctopusController
             _legs = new MyTentacleController[LegRoots.Length];
             legFutureBases = new Transform[LegFutureBases.Length];
             legTargets = new Transform[LegTargets.Length];
+            initLegTargets = new Transform[LegTargets.Length];
             auxFutureBases = new Transform[LegFutureBases.Length];
             auxPrevBases = new Transform[LegFutureBases.Length];
             auxMidPointBases = new Vector3[LegFutureBases.Length];
@@ -101,12 +102,12 @@ namespace OctopusController
                 t[i] = 0;
                 copy[i] = new Vector3[_legs[i].Bones.Length];
                 for (int j = 0; j < _legs[i].Bones.Length - 1; j++)
+                {
                     distances[i][j] = Vector3.Distance(_legs[i].Bones[j].position, _legs[i].Bones[j + 1].position);
-
-
+                }
             }
-            animationRange = 0.5f;
         }
+
         public void InitBody(Transform BodyBase)
         {
             Body = BodyBase;
@@ -144,21 +145,16 @@ namespace OctopusController
             {
                 if (ErrorFunction(tailTarget.position, Solution) > StopThreshold)
                 {
-                    // Debug.Log("Distance = " + Vector3.Distance(target.position, _tail._endEffectorSphere.position));
                     updateTail();
                 }
             }
         }
 
-        //TODO: Notifies the start of the walking animation
         public void NotifyStartWalk()
         {
             lastFrameFordwardVector = legFutureBases[0].position - legFutureBases[1].position;
             lastFrameRightVector = (legFutureBases[0].position + legFutureBases[1].position) * 0.5f - (legFutureBases[4].position + legFutureBases[5].position) * 0.5f;
-            //(legFutureBases[0].position + legFutureBases[1].position) * 0.5f - (legFutureBases[4].position + legFutureBases[5].position) * 0.5f;
         }
-
-        //TODO: create the apropiate animations and update the IK from the legs and tail
 
         public void UpdateIK()
         {
@@ -181,17 +177,14 @@ namespace OctopusController
             accum /= _legs.Length;
             Body.localPosition = new Vector3(Body.localPosition.x, accum, Body.localPosition.z);
 
-           
             Vector3 currentFrameVector = legFutureBases[0].position - legFutureBases[1].position;
             Vector3 currentFrameRightVector = (legFutureBases[0].position + legFutureBases[1].position) * 0.5f - (legFutureBases[4].position + legFutureBases[5].position) * 0.5f;
 
-            
             angle = Vector3.SignedAngle(lastFrameFordwardVector, currentFrameVector, Body.forward);
 
             lefFutureBaseParent.localRotation = Quaternion.Normalize(Quaternion.AngleAxis(-angle, Body.forward));
             Body.localRotation = Quaternion.Normalize(Quaternion.AngleAxis(angle, Body.forward));
 
-           
             angle = Vector3.SignedAngle(lastFrameRightVector, currentFrameRightVector, Body.right);
 
             lefFutureBaseParent.localRotation *= Quaternion.Normalize(Quaternion.AngleAxis(-angle, Body.right));
@@ -211,15 +204,23 @@ namespace OctopusController
                 }
                 if (Vector3.Distance(_legs[i].Bones[0].position, legFutureBases[i].position) > animationRange && !legMoving[i])
                 {
-                    legMoving[i] = true;
-                    auxFutureBases[i] = legFutureBases[i];
-                    auxPrevBases[i] = _legs[i].Bones[0];
-                    auxMidPointBases[i] = auxPrevBases[i].position + ((auxFutureBases[i].position - auxPrevBases[i].position) * 0.5f) + new Vector3(0, .1f, 0);
+                    int a = i - 2;
+                    if(a<0)
+                    {
+                        a = 6 + a;
+                    }
+                    if ( !legMoving[a] && !legMoving[(i + 2) % 5])
+                    {
+                        legMoving[i] = true;
+                        auxFutureBases[i] = legFutureBases[i];
+                        auxPrevBases[i] = _legs[i].Bones[0];
+                        auxMidPointBases[i] = auxPrevBases[i].position + ((auxFutureBases[i].position - auxPrevBases[i].position) * 0.5f) + new Vector3(0, .1f, 0);
+                    }
                 }
 
                 if (legMoving[i])
                 {
-                    t[i] += Time.deltaTime * 5;
+                    t[i] += Time.deltaTime * legLerpSpeed;
 
                     Vector3 a = Vector3.zero;
                     a = Vector3.Lerp(auxPrevBases[i].position, auxFutureBases[i].position, t[i]);
@@ -288,7 +289,6 @@ namespace OctopusController
                 rotation *= Quaternion.AngleAxis(_Solution[i - 1], Axis[i - 1]);
                 Vector3 aux = prevPoint + rotation * StartOffset[i];
 
-                //Debug.DrawLine(aux, prevPoint);
                 prevPoint = aux;
             }
 
