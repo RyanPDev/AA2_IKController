@@ -228,7 +228,7 @@ Animator:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 58591303}
   m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: b4f52974335852c4cb320b077317e4be, type: 3}
+  m_Avatar: {fileID: 9000000, guid: a88ae9caeaf2d4b409bf2064a6eeec6a, type: 3}
   m_Controller: {fileID: 9100000, guid: b20e23c1ccb124a4fa850f74962dcb67, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
@@ -3435,7 +3435,7 @@ Animator:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 585739275}
   m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: b4f52974335852c4cb320b077317e4be, type: 3}
+  m_Avatar: {fileID: 9000000, guid: a88ae9caeaf2d4b409bf2064a6eeec6a, type: 3}
   m_Controller: {fileID: 9100000, guid: b20e23c1ccb124a4fa850f74962dcb67, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
@@ -7250,7 +7250,7 @@ Animator:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1561083016}
   m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: b4f52974335852c4cb320b077317e4be, type: 3}
+  m_Avatar: {fileID: 9000000, guid: a88ae9caeaf2d4b409bf2064a6eeec6a, type: 3}
   m_Controller: {fileID: 9100000, guid: b20e23c1ccb124a4fa850f74962dcb67, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
@@ -7984,6 +7984,31 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1778391320 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100096, guid: 320b1c2af77554f99a1658df4a6d3d5c,
+    type: 3}
+  m_PrefabInstance: {fileID: 871397645}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &1778391322
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1778391320}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: a88ae9caeaf2d4b409bf2064a6eeec6a, type: 3}
+  m_Controller: {fileID: 9100000, guid: b20e23c1ccb124a4fa850f74962dcb67, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &1805834292
 GameObject:
   m_ObjectHideFlags: 0
