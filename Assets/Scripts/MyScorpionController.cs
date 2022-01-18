@@ -187,22 +187,15 @@ namespace OctopusController
 
             
             angle = Vector3.SignedAngle(lastFrameFordwardVector, currentFrameVector, Body.forward);
-            Debug.Log("forward: " + angle);
 
             lefFutureBaseParent.localRotation = Quaternion.Normalize(Quaternion.AngleAxis(-angle, Body.forward));
             Body.localRotation = Quaternion.Normalize(Quaternion.AngleAxis(angle, Body.forward));
 
            
             angle = Vector3.SignedAngle(lastFrameRightVector, currentFrameRightVector, Body.right);
-            Debug.Log("right: " + angle);
 
             lefFutureBaseParent.localRotation *= Quaternion.Normalize(Quaternion.AngleAxis(-angle, Body.right));
             Body.localRotation *= Quaternion.Normalize(Quaternion.AngleAxis(angle, Body.right));
-           
-            
-
-            // lastFrameFordwardVector = currentFrameVector;
-            // lastFrameRightVector = currentFrameRightVector;
 
         }
         private void updateLegPos()
