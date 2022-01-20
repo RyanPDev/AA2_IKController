@@ -84,7 +84,7 @@ public class IK_Scorpion : MonoBehaviour
     public void NotifyStartWalk()
     {
         _myController.NotifyStartWalk();
-        movingBall.CalculateShot(strengthSlider.value,target.position);
+        movingBall.CalculateShot(strengthSlider.value);
     }
 
     private void CheckInput()
