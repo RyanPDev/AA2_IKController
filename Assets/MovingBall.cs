@@ -1,18 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MovingBall : MonoBehaviour
 {
     [SerializeField]
     IK_tentacles _myOctopus;
     public GameObject SpherePrefab;
+    public GameObject SpherePrefab2;
     //movement speed in units per second
     [Range(-1.0f, 1.0f)]
     [SerializeField]
     private float _movementSpeed = 5f;
     public bool shotInAction = false;
-    Vector3 _dir;
     float angle, iSpeed;
     Vector3 initialPosition, endPosition, acceleration;
     const int MAX_ANGLE = 60;
@@ -26,13 +27,17 @@ public class MovingBall : MonoBehaviour
     int steps = 1000;
     float distance;
 
+    public Slider magnusSlider;
+
     Vector3 planarTarget;
     Vector3 planarPosition;
     float yOffset;
     public bool shotCalculated = false;
     List<GameObject> trajectoryList = new List<GameObject>();
+    List<GameObject> magnusTrajectory = new List<GameObject>();
     public List<Animator> spectators;
     public Transform target;
+    Vector3 velocityAfterMagnus;
     void Start()
     {
         transform.rotation = Quaternion.identity;
@@ -43,6 +48,9 @@ public class MovingBall : MonoBehaviour
         {
             GameObject p = Instantiate(SpherePrefab, new Vector3(0, 0, 0), Quaternion.identity);
             trajectoryList.Add(p);
+
+            GameObject g = Instantiate(SpherePrefab2, new Vector3(0, 0, 0), Quaternion.identity);
+            magnusTrajectory.Add(g);
         }
     }
 
@@ -53,6 +61,9 @@ public class MovingBall : MonoBehaviour
         if (shotInAction)
         {
             time += Time.fixedDeltaTime;
+
+            MagnusEffect(magnusSlider.value);
+
             currentPosition = initialPosition + (currentVelocity * time);
             transform.position = currentPosition;
             currentVelocity.y = initialVelocity.y + (acceleration.y * time);
@@ -90,10 +101,25 @@ public class MovingBall : MonoBehaviour
         initialVelocity = CalculateInitialVelocity();
         currentVelocity = initialVelocity;
         shotCalculated = true;
-
-
-
     }
+
+    public void MagnusEffect(float effectStrength)
+    {
+        velocityAfterMagnus = new Vector3(0, 0, 0);
+        currentVelocity += 0.5f * effectStrength * Vector3.Cross(transform.right, currentVelocity);
+        velocityAfterMagnus = currentVelocity;
+
+        float auxTime = 0;
+        Vector3 auxVelocity = initialVelocity;
+        for (int i = 0; i < steps; i++)
+        {
+            auxTime += Time.fixedDeltaTime;
+            magnusTrajectory[i].transform.position = initialPosition + (auxVelocity * auxTime);
+            auxVelocity.y = initialVelocity.y + (acceleration.y * auxTime);
+        }
+    }
+
+
     private Vector3 CalculateInitialVelocity()
     {
         Vector3 iVel = new Vector3(0, 0, 0);
@@ -106,10 +132,12 @@ public class MovingBall : MonoBehaviour
         // return iVel;
         return iVel;
     }
+
     private void CalculateTime()
     {
         totalTime = distance / (iSpeed * Mathf.Cos(angle));
     }
+
     public void ResetShot()
     {
         shotInAction = false;
@@ -118,6 +146,7 @@ public class MovingBall : MonoBehaviour
         time = 0;
 
     }
+
     private void CalculateMovements()
     {
         // Positions of this object and the target on the same plane
@@ -131,6 +160,9 @@ public class MovingBall : MonoBehaviour
         // Distance along the y axis between objects
         yOffset = Mathf.Abs(endPosition.y - initialPosition.y);
     }
+
+
+
     public void CallAnimations(bool isShooting = true)
     {
         int _count = 0;
@@ -141,6 +173,7 @@ public class MovingBall : MonoBehaviour
             _count++;
         }
     }
+
     private void OnCollisionEnter(Collision collision)
     {
         if (!shotInAction && collision.gameObject.tag == "Tail")
@@ -154,6 +187,7 @@ public class MovingBall : MonoBehaviour
         }
 
     }
+
     public Vector3 GetParabolaNextPosition(Vector3 position, Vector3 velocity, float gravity, float time)
     {
         return initialPosition + (velocity * time);

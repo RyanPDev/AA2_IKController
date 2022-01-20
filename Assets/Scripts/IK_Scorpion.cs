@@ -21,6 +21,7 @@ public class IK_Scorpion : MonoBehaviour
     public GameObject ball;
     MovingBall movingBall;
     public Slider strengthSlider;
+    public Slider effectSlider;
 
     [Header("Tail")]
     public Transform tailTarget;
@@ -74,6 +75,7 @@ public class IK_Scorpion : MonoBehaviour
 
         _myController.UpdateIK();
         CheckInput();
+        movingBall.MagnusEffect(effectSlider.value);
     }
 
 
@@ -89,10 +91,22 @@ public class IK_Scorpion : MonoBehaviour
     {
         _myController.NotifyStartWalk();
         movingBall.CalculateShot(strengthSlider.value);
+        //movingBall.MagnusEffect(effectSlider.value);
     }
 
     private void CheckInput()
     {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            if (currentState == AnimState.CALCULATING_EFFECT)
+            {
+                NotifyStartWalk();
+                animTime = 0;
+                animPlaying = true;
+                currentState = AnimState.MOVING;
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
             startTime = time;
@@ -108,28 +122,43 @@ public class IK_Scorpion : MonoBehaviour
             }
         }
 
-        if (Input.GetKey(KeyCode.Space) && currentState == AnimState.CALCULATING_FORCE)
+        if (currentState == AnimState.CALCULATING_FORCE)
         {
-            strengthSlider.value = Mathf.PingPong(time - startTime, 1);
+            if (Input.GetKey(KeyCode.Space))
+            {
+                strengthSlider.value = Mathf.PingPong(time - startTime, 1);
+            }
+        }
+
+        if (currentState == AnimState.CALCULATING_EFFECT)
+        {
+            if (Input.GetKey(KeyCode.Z))
+            {
+                effectSlider.value -= Time.deltaTime;
+                movingBall.MagnusEffect(effectSlider.value);
+            }
+
+            if (Input.GetKey(KeyCode.X))
+            {
+                effectSlider.value += Time.deltaTime;
+                movingBall.MagnusEffect(effectSlider.value);
+            }
         }
 
         if (Input.GetKeyUp(KeyCode.Space))
         {
             if (currentState == AnimState.CALCULATING_FORCE)
             {
-                NotifyStartWalk();
-                animTime = 0;
-                animPlaying = true;
-                currentState = AnimState.MOVING;
+                currentState = AnimState.CALCULATING_EFFECT;
             }
-            else if (currentState == AnimState.MOVING)
+
+            if (currentState == AnimState.MOVING)
             {
                 currentState = AnimState.CALCULATING_FORCE;
                 _myController.ResetScopion();
                 ball.transform.position = position;
 
                 movingBall.ResetShot();
-
             }
         }
     }
