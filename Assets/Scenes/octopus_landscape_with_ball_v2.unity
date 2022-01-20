@@ -8649,6 +8649,11 @@ MonoBehaviour:
   shotInAction: 0
   initialVelocity: {x: 0, y: 0, z: 0}
   shotCalculated: 0
+  spectators:
+  - {fileID: 58591304}
+  - {fileID: 1561083018}
+  - {fileID: 585739277}
+  - {fileID: 1778391322}
   target: {fileID: 1418656078}
 --- !u!4 &1946850105 stripped
 Transform:

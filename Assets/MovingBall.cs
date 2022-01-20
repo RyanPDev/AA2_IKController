@@ -32,6 +32,7 @@ public class MovingBall : MonoBehaviour
     float yOffset;
     public bool shotCalculated = false;
     List<GameObject> trajectoryList = new List<GameObject>();
+   public  List<Animator> spectators;
     public Transform target;
     void Start()
     {
@@ -130,6 +131,7 @@ public class MovingBall : MonoBehaviour
     public void ResetShot()
     {
         shotInAction = false;
+        CallAnimations(false);
         shotCalculated = false;
         time = 0;
 
@@ -148,6 +150,16 @@ public class MovingBall : MonoBehaviour
         yOffset = Mathf.Abs(endPosition.y - initialPosition.y);
        // yOffset = Mathf.Abs(initialPosition.y -  endPosition.y);
     }
+    public void CallAnimations(bool isShooting = true)
+    {
+        int _count = 0;
+        foreach(Animator a in spectators)
+        {
+            a.SetBool("goal", isShooting);
+            a.SetBool("InsideGoal", _count % 2 == 0 ? counter % 2 == 0 : counter % 2 != 0);
+            _count++;
+        }
+    }
     private void OnCollisionEnter(Collision collision)
     {
         if (!shotInAction && collision.gameObject.tag == "Tail")
@@ -156,7 +168,7 @@ public class MovingBall : MonoBehaviour
                 _myOctopus.NotifyShoot();
 
             counter++;
-
+            CallAnimations(true);
             shotInAction = true;
         }
 
