@@ -17,7 +17,7 @@ public class IK_Scorpion : MonoBehaviour
     public Transform StartPos;
     public Transform EndPos;
 
-    public Transform target;
+   // public Transform target;
     public GameObject ball;
     MovingBall movingBall;
     public Slider strengthSlider;
@@ -30,7 +30,7 @@ public class IK_Scorpion : MonoBehaviour
     public Transform[] legs;
     public Transform[] legTargets;
     public Transform[] futureLegBases;
-
+    Vector3 position;
     enum AnimState
     {
         CALCULATING_FORCE, CALCULATING_EFFECT, MOVING
@@ -41,13 +41,15 @@ public class IK_Scorpion : MonoBehaviour
     float time = 0;
     float startTime = 0;
     [SerializeField] private const float MAX_FORCE = 100;
-
+    float radius;
     void Start()
     {
         _myController.InitLegs(legs, futureLegBases, legTargets);
         _myController.InitTail(tail);
         _myController.InitBody(Body);
         movingBall = ball.GetComponent<MovingBall>();
+        position = ball.transform.position;
+        radius = ball.GetComponent<SphereCollider>().radius * ball.transform.localScale.x;
     }
 
     void Update()
@@ -73,10 +75,12 @@ public class IK_Scorpion : MonoBehaviour
         _myController.UpdateIK();
         CheckInput();
     }
+    
 
     //Function to send the tail target transform to the dll
     public void NotifyTailTarget()
     {
+        tailTarget.position = ball.transform.position- Vector3.Normalize(movingBall.initialVelocity) * radius;
         _myController.NotifyTailTarget(tailTarget);
     }
 
@@ -121,12 +125,14 @@ public class IK_Scorpion : MonoBehaviour
             else if (currentState == AnimState.MOVING)
             {
                 currentState = AnimState.CALCULATING_FORCE;
+                _myController.ResetScopion();
+                ball.transform.position = position;
+                
+                movingBall.ResetShot();
+               
             }
         }
     }
 
-    private void CalculateBallTrajectory()
-    {
-        //apply trajectory calculations
-    }
+ 
 }

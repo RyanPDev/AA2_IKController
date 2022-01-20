@@ -11,7 +11,7 @@ public class MovingBall : MonoBehaviour
     [Range(-1.0f, 1.0f)]
     [SerializeField]
     private float _movementSpeed = 5f;
-    bool shotInAction = false;
+   public bool shotInAction = false;
     Vector3 _dir;
     float angle,iSpeed;
     Vector3 initialPosition,endPosition, acceleration;
@@ -19,22 +19,24 @@ public class MovingBall : MonoBehaviour
     int counter = 0;
     float verticalMovement, horizontalMovement;
     float time,totalTime;
-    Vector3 initialVelocity;
+   public Vector3 initialVelocity;
     Vector3 unitDirection;
     Vector3 currentVelocity;
     Vector3 currentPosition;
     // Start is called before the first frame update
-    public int steps = 100;
+     int steps = 1000;
     float distance;
+    
     Vector3 planarTarget;
      Vector3 planarPosition;
     float yOffset;
-    bool shotCalculated = false;
+    public bool shotCalculated = false;
     List<GameObject> trajectoryList = new List<GameObject>();
     public Transform target;
     void Start()
     {
         transform.rotation = Quaternion.identity;
+        initialVelocity = new Vector3(0, 0, 0);
         acceleration = new Vector3(0,- 9.8f , 0);
         time = 0;
         for(int i = 0; i < steps; i++)
@@ -63,9 +65,6 @@ public class MovingBall : MonoBehaviour
             {
                 shotInAction = false;
             }
-
-            
-
         }
         if (shotCalculated)
         {
@@ -88,7 +87,7 @@ public class MovingBall : MonoBehaviour
         currentPosition = initialPosition;
 
         endPosition = target.position;
-        angle = (MAX_ANGLE *  (1-_power)) + 15; // Minim angle of 15
+        angle = (MAX_ANGLE * (1-_power)) + 10; // Minim angle of 30
         angle*= Mathf.Deg2Rad;
         CalculateMovements();
         //float omega = Mathf.Sqrt(Mathf.Pow(-acceleration * 0.5f, 2) * Mathf.Pow(horizontalMovement, 2) / (verticalMovement- horizontalMovement));
@@ -113,9 +112,14 @@ public class MovingBall : MonoBehaviour
        //iVel.x = iSpeed * Mathf.Cos(angle) * unitDirection.x;
        //iVel.z = iSpeed * Mathf.Cos(angle) * unitDirection.z;
         // Rotate our velocity to match the direction between the two objects
-        Vector3 velocity = new Vector3(0,iSpeed * Mathf.Sin(angle), iSpeed * Mathf.Cos(angle)*2);
-        float angleBetweenObjects = Vector3.Angle(Vector3.forward, planarTarget - planarPosition) * (endPosition.x > transform.position.x ? 1 : -1); 
-        iVel = Quaternion.AngleAxis(angleBetweenObjects, Vector3.up) * velocity;
+      Vector3 velocity = new Vector3(0,iSpeed * Mathf.Sin(angle)*2, iSpeed * Mathf.Cos(angle));
+        float angleBetweenObjects = Vector3.Angle(Vector3.forward, unitDirection) * (endPosition.x > transform.position.x ? 1 : -1);
+      
+      iVel = Quaternion.AngleAxis(angleBetweenObjects, Vector3.up) * velocity;
+
+      // iVel.x = iSpeed * Mathf.Cos(angle) * unitDirection.x;
+      // iVel.y = iSpeed * Mathf.Sin(angle) * unitDirection.y;
+      // iVel.z = iSpeed * Mathf.Cos(angle) * unitDirection.z;
         // return iVel;
         return iVel;
     }
@@ -123,11 +127,19 @@ public class MovingBall : MonoBehaviour
     {
         totalTime = distance / (iSpeed * Mathf.Cos(angle));
     }
+    public void ResetShot()
+    {
+        shotInAction = false;
+        shotCalculated = false;
+        time = 0;
+
+    }
     private void CalculateMovements()
     {
         // Positions of this object and the target on the same plane
         planarTarget    = new Vector3(endPosition.x, 0, endPosition.z);
         planarPosition = new Vector3(transform.position.x, 0, transform.position.z);
+        unitDirection = Vector3.Normalize(planarTarget - planarPosition);
 
         // Planar distance between objects
         distance = Vector3.Distance(planarTarget, planarPosition);
@@ -138,7 +150,7 @@ public class MovingBall : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        if (!shotInAction)
+        if (!shotInAction && collision.gameObject.tag == "Tail")
         {
             if (counter % 2 == 0)
                 _myOctopus.NotifyShoot();

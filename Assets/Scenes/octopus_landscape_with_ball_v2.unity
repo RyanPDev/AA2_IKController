@@ -1020,6 +1020,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 865907604773395664, guid: c9ae8800298c5904a805978e2ff06201,
+        type: 3}
+      propertyPath: m_TagString
+      value: Tail
+      objectReference: {fileID: 0}
     - target: {fileID: 962731551332921361, guid: c9ae8800298c5904a805978e2ff06201,
         type: 3}
       propertyPath: m_Name
@@ -1908,14 +1913,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _myOctopus: {fileID: 0}
-  animDuration: 5
+  animDuration: 15
   Body: {fileID: 211139673}
   StartPos: {fileID: 353675564}
   EndPos: {fileID: 1752872857}
-  target: {fileID: 1418656078}
   ball: {fileID: 1938829479}
   strengthSlider: {fileID: 1725396510}
-  tailTarget: {fileID: 1938829484}
+  tailTarget: {fileID: 379258274}
   tail: {fileID: 211139672}
   legs:
   - {fileID: 211139671}
@@ -2546,6 +2550,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 362755498}
   m_CullTransparentMesh: 0
+--- !u!1 &379258273
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 379258274}
+  m_Layer: 2
+  m_Name: TailTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 3443629218296621865, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &379258274
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 379258273}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1938829484}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &463616871 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 865907604773395664, guid: c9ae8800298c5904a805978e2ff06201,
@@ -8398,15 +8432,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 70f145abed0b4ae48acf34cbafba0570, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -124.87
+      value: -124.215
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 70f145abed0b4ae48acf34cbafba0570, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 21.501
+      value: 21.876
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 70f145abed0b4ae48acf34cbafba0570, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -39.53
+      value: -40.841
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 70f145abed0b4ae48acf34cbafba0570, type: 3}
       propertyPath: m_LocalRotation.w
@@ -8483,7 +8517,9 @@ MonoBehaviour:
   SpherePrefab: {fileID: 590187474362579832, guid: 83f3ff8fa7464f4478fada4a4a8d8cf5,
     type: 3}
   _movementSpeed: 0.5
-  steps: 100
+  shotInAction: 0
+  initialVelocity: {x: 0, y: 0, z: 0}
+  shotCalculated: 0
   target: {fileID: 1418656078}
 --- !u!4 &1946850105 stripped
 Transform:

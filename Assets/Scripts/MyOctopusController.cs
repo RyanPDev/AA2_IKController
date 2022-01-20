@@ -59,7 +59,7 @@ namespace OctopusController
             _theta = new float[tentacleRoots.Length][];
 
             _randomTargets = randomTargets;
-            maxTime = 3;
+            maxTime = 6;
             timer = maxTime;
             for (int i = 0; i < tentacleRoots.Length; i++)
             {
