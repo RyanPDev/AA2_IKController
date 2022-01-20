@@ -44,14 +44,12 @@ namespace OctopusController
         public float SlowdownThreshold = 0.25f; // If closer than this, it linearly slows down
         RaycastHit hit;
         int layerMask = 1 << 0;
-    
+
         float angle;
         // The offset at resting position
         Vector3[] StartOffset;
-        const float INITIAL_OFFSET = 2.034429f;
         //LEGS
         Transform[] legTargets;
-        Transform[] initLegTargets;
         Transform[] legFutureBases;
         Transform[] auxFutureBases;
         Transform[] auxPrevBases;
@@ -71,7 +69,7 @@ namespace OctopusController
         Vector3 lastFrameRightVector;
         Vector3[][] initialPositions;
         Quaternion[][] initialRotations;
-       
+
 
         float threshHold = 0.03f;
         int maxIterations = 15;
@@ -87,10 +85,9 @@ namespace OctopusController
             _legs = new MyTentacleController[LegRoots.Length];
             legFutureBases = new Transform[LegFutureBases.Length];
             legTargets = new Transform[LegTargets.Length];
-            initLegTargets = new Transform[LegTargets.Length];
             auxFutureBases = new Transform[LegFutureBases.Length];
             auxPrevBases = new Transform[LegFutureBases.Length];
-           
+
             auxMidPointBases = new Vector3[LegFutureBases.Length];
             legMoving = new bool[LegRoots.Length];
             legFutureBases = LegFutureBases;
@@ -140,7 +137,7 @@ namespace OctopusController
             for (int i = 0; i < _tail.Bones.Length; i++)
             {
                 tailInitialPositions[i] = _tail.Bones[i].localPosition;
-                  tailInitialRotations[i] = _tail.Bones[i].localRotation;
+                tailInitialRotations[i] = _tail.Bones[i].localRotation;
                 StartOffset[i] = _tail.Bones[i].localPosition * 0.32622f;
                 if (i >= 1)
                 {
@@ -171,7 +168,7 @@ namespace OctopusController
 
         public void NotifyStartWalk()
         {
-          
+
             lastFrameFordwardVector = legFutureBases[0].position - legFutureBases[1].position;
             lastFrameRightVector = (legFutureBases[0].position + legFutureBases[1].position) * 0.5f - (legFutureBases[4].position + legFutureBases[5].position) * 0.5f;
         }
@@ -243,7 +240,7 @@ namespace OctopusController
                 if (Vector3.Distance(_legs[i].Bones[0].position, legFutureBases[i].position) > animationRange && !legMoving[i])
                 {
                     int a = i - 2;
-                    if(a<0)
+                    if (a < 0)
                     {
                         a = 6 + a;
                     }

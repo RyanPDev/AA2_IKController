@@ -17,7 +17,7 @@ public class IK_Scorpion : MonoBehaviour
     public Transform StartPos;
     public Transform EndPos;
 
-   // public Transform target;
+    // public Transform target;
     public GameObject ball;
     MovingBall movingBall;
     public Slider strengthSlider;
@@ -64,7 +64,7 @@ public class IK_Scorpion : MonoBehaviour
         if (animTime < animDuration)
         {
             Body.position = Vector3.Lerp(StartPos.position, EndPos.position, animTime / animDuration);
-           
+
         }
         else if (animTime >= animDuration && animPlaying)
         {
@@ -75,12 +75,12 @@ public class IK_Scorpion : MonoBehaviour
         _myController.UpdateIK();
         CheckInput();
     }
-    
+
 
     //Function to send the tail target transform to the dll
     public void NotifyTailTarget()
     {
-        tailTarget.position = ball.transform.position- Vector3.Normalize(movingBall.initialVelocity) * radius;
+        tailTarget.position = ball.transform.position - Vector3.Normalize(movingBall.initialVelocity) * radius;
         _myController.NotifyTailTarget(tailTarget);
     }
 
@@ -116,7 +116,7 @@ public class IK_Scorpion : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Space))
         {
             if (currentState == AnimState.CALCULATING_FORCE)
-            {                
+            {
                 NotifyStartWalk();
                 animTime = 0;
                 animPlaying = true;
@@ -127,12 +127,12 @@ public class IK_Scorpion : MonoBehaviour
                 currentState = AnimState.CALCULATING_FORCE;
                 _myController.ResetScopion();
                 ball.transform.position = position;
-                
+
                 movingBall.ResetShot();
-               
+
             }
         }
     }
 
- 
+
 }
