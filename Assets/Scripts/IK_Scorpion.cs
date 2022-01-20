@@ -19,7 +19,7 @@ public class IK_Scorpion : MonoBehaviour
 
     public Transform target;
     public GameObject ball;
-
+    MovingBall movingBall;
     public Slider strengthSlider;
 
     [Header("Tail")]
@@ -47,6 +47,7 @@ public class IK_Scorpion : MonoBehaviour
         _myController.InitLegs(legs, futureLegBases, legTargets);
         _myController.InitTail(tail);
         _myController.InitBody(Body);
+        movingBall = ball.GetComponent<MovingBall>();
     }
 
     void Update()
@@ -83,6 +84,7 @@ public class IK_Scorpion : MonoBehaviour
     public void NotifyStartWalk()
     {
         _myController.NotifyStartWalk();
+        movingBall.CalculateShot(strengthSlider.value,target.position);
     }
 
     private void CheckInput()

@@ -38,7 +38,7 @@ namespace OctopusController
         public float[] Solution = null;
         float[] t;
         public float DeltaGradient = 0.1f; // Used to simulate gradient (degrees)
-        public float LearningRate = 10f; // How much we move depending on the gradient
+        public float LearningRate = 20f; // How much we move depending on the gradient
 
         public float StopThreshold = 0.1f; // If closer than this, it stops
         public float SlowdownThreshold = 0.25f; // If closer than this, it linearly slows down
@@ -61,6 +61,7 @@ namespace OctopusController
         MyTentacleController[] _legs = new MyTentacleController[6];
         public float animationRange = 0.4f;
         public float legLerpSpeed = 7;
+        float legsHeigthThreshold = .1f;
         bool[] legMoving;
 
         ////Fabrik
@@ -209,12 +210,12 @@ namespace OctopusController
                     {
                         a = 6 + a;
                     }
-                    if ( !legMoving[a] && !legMoving[(i + 2) % 5])
+                    if (!legMoving[a] && !legMoving[(i + 2) % 5])
                     {
                         legMoving[i] = true;
                         auxFutureBases[i] = legFutureBases[i];
                         auxPrevBases[i] = _legs[i].Bones[0];
-                        auxMidPointBases[i] = auxPrevBases[i].position + ((auxFutureBases[i].position - auxPrevBases[i].position) * 0.5f) + new Vector3(0, .1f, 0);
+                        auxMidPointBases[i] = auxPrevBases[i].position + ((auxFutureBases[i].position - auxPrevBases[i].position) * 0.5f) + new Vector3(0, legsHeigthThreshold, 0);
                     }
                 }
 
