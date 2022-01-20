@@ -106,16 +106,19 @@ public class MovingBall : MonoBehaviour
     public void MagnusEffect(float effectStrength)
     {
         velocityAfterMagnus = new Vector3(0, 0, 0);
-        currentVelocity += 0.5f * effectStrength * Vector3.Cross(transform.right, currentVelocity);
-        velocityAfterMagnus = currentVelocity;
+
+        velocityAfterMagnus = 0.5f * effectStrength * Vector3.Cross(transform.right, currentVelocity); ;
 
         float auxTime = 0;
         Vector3 auxVelocity = initialVelocity;
+        Vector3 auxMagVel = velocityAfterMagnus;
         for (int i = 0; i < steps; i++)
         {
             auxTime += Time.fixedDeltaTime;
             magnusTrajectory[i].transform.position = initialPosition + (auxVelocity * auxTime);
+            auxMagVel = 0.5f * effectStrength * Vector3.Cross(transform.right*-1, Vector3.Normalize(auxVelocity))*0.008f*1.23f* Mathf.Pow(auxVelocity.magnitude,2);
             auxVelocity.y = initialVelocity.y + (acceleration.y * auxTime);
+            auxVelocity += auxMagVel;
         }
     }
 
